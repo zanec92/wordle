@@ -2,23 +2,31 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 	"wordle/internal/domain"
-	"wordle/internal/domain/dto"
 )
 
 type Repository interface {
-	GetDailyWord(ctx context.Context) (*domain.Word, error)
+	GetDailyWord(ctx context.Context) (*domain.DailyWord, error)
+	CheckInDictionaryExists(ctx context.Context, ew *domain.EnteredWord) (bool, error)
 }
 
-func CheckWord(ctx context.Context, repo Repository, params dto.CheckWordParams) (*domain.Word, error) {
-	w, err := repo.GetDailyWord(ctx)
+func CheckWord(ctx context.Context, repo Repository, ew *domain.EnteredWord) (*domain.EnteredWord, error) {
+	exists, err := repo.CheckInDictionaryExists(ctx, ew)
 	if err != nil {
 		return nil, err
 	}
-	err = w.Check(params)
+	if !exists {
+		return nil, fmt.Errorf("%s", "несуществующее слово")
+	}
+	dw, err := repo.GetDailyWord(ctx)
+	if err != nil {
+		return nil, err
+	}
+	err = ew.CheckLetters(dw)
 	if err != nil {
 		return nil, err
 	}
 
-	return w, nil
+	return ew, nil
 }

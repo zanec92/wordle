@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"wordle/internal"
-	"wordle/internal/domain/dto"
+	"wordle/internal/domain"
 	usecases "wordle/internal/use_cases"
 )
 
@@ -14,5 +14,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(usecases.CheckWord(ctx, app.Repo, dto.CheckWordParams{}))
+	w := "ПАИТА"
+	c, err := usecases.CheckWord(ctx, app.Repo, domain.NewEnteredWord(w))
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < 5; i++ {
+		fmt.Printf("%+v\n", c.Letters[i])
+		fmt.Println(string(c.Letters[i].Value))
+	}
 }
